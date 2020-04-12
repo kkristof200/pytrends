@@ -37,6 +37,12 @@ class TrendReq(object):
     CATEGORIES_URL = 'https://trends.google.com/trends/api/explore/pickers/category'
     TODAY_SEARCHES_URL = 'https://trends.google.com/trends/api/dailytrends'
 
+    """
+    Defauld keyword
+    Used for empty searches, when the client doesn't want keyword specific search results
+    """
+    DEFAULT_KEYWORD_VALUE = ''
+
     def __init__(self, hl='en-US', tz=360, geo='', timeout=(2, 5), proxies='',
                  retries=0, backoff_factor=0):
         """
@@ -148,6 +154,9 @@ class TrendReq(object):
     def build_payload(self, kw_list, cat=0, timeframe='today 5-y', geo='',
                       gprop=''):
         """Create the payload for related queries, interest over time and interest by region"""
+        if not kw_list or len(kw_list) == 0:
+            kw_list = [self.DEFAULT_KEYWORD_VALUE]
+        
         self.kw_list = kw_list
         self.geo = geo or self.geo
         self.token_payload = {
@@ -307,8 +316,11 @@ class TrendReq(object):
         result_dict = dict()
         for request_json in self.related_topics_widget_list:
             # ensure we know which keyword we are looking at rather than relying on order
-            kw = request_json['request']['restriction'][
-                'complexKeywordsRestriction']['keyword'][0]['value']
+            try:
+                kw = request_json['request']['restriction']['complexKeywordsRestriction']['keyword'][0]['value']
+            except:
+                kw = self.DEFAULT_KEYWORD_VALUE
+            
             # convert to string as requests will mangle
             related_payload['req'] = json.dumps(request_json['request'])
             related_payload['token'] = request_json['token']
@@ -356,8 +368,11 @@ class TrendReq(object):
         result_dict = dict()
         for request_json in self.related_queries_widget_list:
             # ensure we know which keyword we are looking at rather than relying on order
-            kw = request_json['request']['restriction'][
-                'complexKeywordsRestriction']['keyword'][0]['value']
+            try:
+                kw = request_json['request']['restriction']['complexKeywordsRestriction']['keyword'][0]['value']
+            except:
+                kw = self.DEFAULT_KEYWORD_VALUE
+            
             # convert to string as requests will mangle
             related_payload['req'] = json.dumps(request_json['request'])
             related_payload['token'] = request_json['token']
