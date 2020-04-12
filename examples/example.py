@@ -33,3 +33,7 @@ print(top_charts_df.head())
 # Get Google Keyword Suggestions
 suggestions_dict = pytrend.suggestions(keyword='pizza')
 print(suggestions_dict)
+
+# Create payload without specified keyword
+pytrend.build_payload(None, timeframe='today 1-m', geo='US', gprop='youtube')
+print(pytrend.related_queries())
